@@ -83,7 +83,7 @@ func TestRenderTemplate(t *testing.T) {
 			setup()
 			defer gock.Off()
 
-			output, err := RenderTemplate(tc.file, values)
+			output, err := RenderTemplate(http.DefaultClient, tc.file, values)
 			if err != nil {
 				panic(err)
 			}
@@ -109,7 +109,7 @@ func TestRenderTemplateRetry(t *testing.T) {
 	srv := httptest.NewServer(handler)
 	defer srv.Close()
 
-	_, err := DownloadFileWithName(srv.URL+"/rajatjindal/kubectl-whoami/releases/download/v0.0.2/kubectl-whoami_v0.0.2_darwin_amd64.tar.gz", "whoami")
+	_, err := DownloadFileWithName(http.DefaultClient, srv.URL+"/rajatjindal/kubectl-whoami/releases/download/v0.0.2/kubectl-whoami_v0.0.2_darwin_amd64.tar.gz", "whoami")
 	assert.NotNil(t, err)
 	assert.Equal(t, 4, retries)
 }

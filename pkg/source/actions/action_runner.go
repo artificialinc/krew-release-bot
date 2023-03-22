@@ -24,12 +24,13 @@ func getHTTPClient() *http.Client {
 		return oauth2.NewClient(context.TODO(), ts)
 	}
 
-	return nil
+	return http.DefaultClient
 }
 
-//RunAction runs the github action
+// RunAction runs the github action
 func RunAction() error {
-	client := github.NewClient(getHTTPClient())
+	h := getHTTPClient()
+	client := github.NewClient(h)
 	provider := cicd.GetProvider()
 
 	if provider == nil {
@@ -71,7 +72,7 @@ func RunAction() error {
 		TemplateFile:       templateFile,
 	}
 
-	pluginName, pluginManifest, err := source.ProcessTemplate(templateFile, releaseRequest)
+	pluginName, pluginManifest, err := source.ProcessTemplate(h, templateFile, releaseRequest)
 	if err != nil {
 		return err
 	}

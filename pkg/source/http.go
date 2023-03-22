@@ -21,12 +21,12 @@ const (
 // getWithRetry is basically http.Get with retries
 // we cannot use RoundTripper as gock (lib we use for testing)
 // overrides the Transport and thus we cannot test our retryable transport
-func getWithRetry(uri string) (*http.Response, error) {
+func getWithRetry(uri string, client *http.Client) (*http.Response, error) {
 	var resp *http.Response
 	var err error
 
 	for i := 0; i < maxRetries; i++ {
-		resp, err = http.Get(uri)
+		resp, err = client.Get(uri)
 		shouldRetry := checkRetry(resp, err)
 		if !shouldRetry {
 			break

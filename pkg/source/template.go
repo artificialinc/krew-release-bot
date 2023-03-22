@@ -3,6 +3,7 @@ package source
 import (
 	"bytes"
 	"fmt"
+	"net/http"
 	"path"
 	"strings"
 	"text/template"
@@ -11,7 +12,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-//InvalidPluginSpecError is invalid plugin spec error
+// InvalidPluginSpecError is invalid plugin spec error
 type InvalidPluginSpecError struct {
 	Spec string
 	err  string
@@ -33,9 +34,9 @@ func indent(spaces int, v string) string {
 	return strings.TrimSpace(pad + strings.Replace(v, "\n", "\n"+pad, -1))
 }
 
-//ProcessTemplate process the .krew.yaml template for the release request
-func ProcessTemplate(templateFile string, values interface{}) (string, []byte, error) {
-	spec, err := RenderTemplate(templateFile, values)
+// ProcessTemplate process the .krew.yaml template for the release request
+func ProcessTemplate(client *http.Client, templateFile string, values interface{}) (string, []byte, error) {
+	spec, err := RenderTemplate(client, templateFile, values)
 	if err != nil {
 		return "", nil, err
 	}
@@ -51,8 +52,8 @@ func ProcessTemplate(templateFile string, values interface{}) (string, []byte, e
 	return pluginName, spec, nil
 }
 
-//RenderTemplate process the .krew.yaml template for the release request
-func RenderTemplate(templateFile string, values interface{}) ([]byte, error) {
+// RenderTemplate process the .krew.yaml template for the release request
+func RenderTemplate(client *http.Client, templateFile string, values interface{}) ([]byte, error) {
 	logrus.Debugf("started processing of template %s", templateFile)
 	name := path.Base(templateFile)
 	t := template.New(name).Funcs(map[string]interface{}{
@@ -75,7 +76,7 @@ func RenderTemplate(templateFile string, values interface{}) ([]byte, error) {
 			}
 
 			logrus.Infof("getting sha256 for %s", buf.String())
-			sha256, err := getSha256ForAsset(buf.String())
+			sha256, err := getSha256ForAsset(client, buf.String())
 			if err != nil {
 				panic(err)
 			}

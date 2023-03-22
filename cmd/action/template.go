@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/rajatjindal/krew-release-bot/pkg/source"
@@ -39,7 +40,7 @@ var templateCmd = &cobra.Command{
 			TagName: tagName,
 		}
 
-		_, spec, err := source.ProcessTemplate(templateFile, releaseRequest)
+		_, spec, err := source.ProcessTemplate(http.DefaultClient, templateFile, releaseRequest)
 		if err == nil {
 			fmt.Println(string(spec))
 			os.Exit(0)

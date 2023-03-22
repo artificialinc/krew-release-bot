@@ -16,9 +16,9 @@ import (
 
 const retries = 4
 
-//DownloadFileWithName downloads a file with name
-func DownloadFileWithName(uri, name string) (string, error) {
-	resp, err := getWithRetry(uri)
+// DownloadFileWithName downloads a file with name
+func DownloadFileWithName(client *http.Client, uri, name string) (string, error) {
+	resp, err := getWithRetry(uri, client)
 	if err != nil {
 		return "", err
 	}
@@ -49,12 +49,12 @@ func DownloadFileWithName(uri, name string) (string, error) {
 	return file, nil
 }
 
-func downloadFile(uri string) (string, error) {
-	return DownloadFileWithName(uri, fmt.Sprintf("%d", time.Now().Unix()))
+func downloadFile(client *http.Client, uri string) (string, error) {
+	return DownloadFileWithName(client, uri, fmt.Sprintf("%d", time.Now().Unix()))
 }
 
-func getSha256ForAsset(uri string) (string, error) {
-	file, err := downloadFile(uri)
+func getSha256ForAsset(client *http.Client, uri string) (string, error) {
+	file, err := downloadFile(client, uri)
 	if err != nil {
 		return "", err
 	}
