@@ -1,14 +1,11 @@
 package actions
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/google/go-github/v29/github"
 	"github.com/rajatjindal/krew-release-bot/pkg/cicd"
@@ -117,33 +114,36 @@ func submitForPR(request *source.ReleaseRequest) (string, error) {
 		return "", err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, getWebhookURL(), bytes.NewBuffer(body))
-	if err != nil {
-		return "", err
-	}
+	logrus.Infof("sending request to webhook: %s", string(body))
+	return "", nil
 
-	req.Header.Add("content-type", "application/json")
+	// req, err := http.NewRequest(http.MethodPost, getWebhookURL(), bytes.NewBuffer(body))
+	// if err != nil {
+	// 	return "", err
+	// }
 
-	client := http.Client{
-		Timeout: time.Duration(30 * time.Second),
-	}
+	// req.Header.Add("content-type", "application/json")
 
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
+	// client := http.Client{
+	// 	Timeout: time.Duration(30 * time.Second),
+	// }
 
-	defer resp.Body.Close()
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
+	// resp, err := client.Do(req)
+	// if err != nil {
+	// 	return "", err
+	// }
 
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("expected status code %d got %d. body: %s", http.StatusOK, resp.StatusCode, string(respBody))
-	}
+	// defer resp.Body.Close()
+	// respBody, err := ioutil.ReadAll(resp.Body)
+	// if err != nil {
+	// 	return "", err
+	// }
 
-	return string(respBody), nil
+	// if resp.StatusCode != http.StatusOK {
+	// 	return "", fmt.Errorf("expected status code %d got %d. body: %s", http.StatusOK, resp.StatusCode, string(respBody))
+	// }
+
+	// return string(respBody), nil
 }
 
 func getWebhookURL() string {
