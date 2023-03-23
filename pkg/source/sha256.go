@@ -5,55 +5,15 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"net/http"
 	"os"
-	"path/filepath"
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
-const retries = 4
-
-// DownloadFileWithName downloads a file with name
-func DownloadFileWithName(client *http.Client, uri, name string) (string, error) {
-	resp, err := getWithRetry(uri, client)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("downloading file %s failed. status code: %d, expected: %d", uri, resp.StatusCode, http.StatusOK)
-	}
-
-	dir, err := ioutil.TempDir("", "")
-	if err != nil {
-		return "", err
-	}
-
-	file := filepath.Join(dir, name)
-	out, err := os.Create(file)
-	if err != nil {
-		return "", err
-	}
-	defer out.Close()
-
-	_, err = io.Copy(out, resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("failed to save file %s. error: %v", file, err)
-	}
-
-	logrus.Infof("downloaded file %s", file)
-	return file, nil
+func downloadFile(client Downloader, uri string) (string, error) {
+	return client.DownloadFileWithName(uri, fmt.Sprintf("%d", time.Now().Unix()))
 }
 
-func downloadFile(client *http.Client, uri string) (string, error) {
-	return DownloadFileWithName(client, uri, fmt.Sprintf("%d", time.Now().Unix()))
-}
-
-func getSha256ForAsset(client *http.Client, uri string) (string, error) {
+func getSha256ForAsset(client Downloader, uri string) (string, error) {
 	file, err := downloadFile(client, uri)
 	if err != nil {
 		return "", err

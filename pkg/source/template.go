@@ -3,7 +3,6 @@ package source
 import (
 	"bytes"
 	"fmt"
-	"net/http"
 	"path"
 	"strings"
 	"text/template"
@@ -35,8 +34,8 @@ func indent(spaces int, v string) string {
 }
 
 // ProcessTemplate process the .krew.yaml template for the release request
-func ProcessTemplate(client *http.Client, templateFile string, values interface{}) (string, []byte, error) {
-	spec, err := RenderTemplate(client, templateFile, values)
+func ProcessTemplate(downloader Downloader, templateFile string, values interface{}) (string, []byte, error) {
+	spec, err := RenderTemplate(downloader, templateFile, values)
 	if err != nil {
 		return "", nil, err
 	}
@@ -53,7 +52,7 @@ func ProcessTemplate(client *http.Client, templateFile string, values interface{
 }
 
 // RenderTemplate process the .krew.yaml template for the release request
-func RenderTemplate(client *http.Client, templateFile string, values interface{}) ([]byte, error) {
+func RenderTemplate(downloader Downloader, templateFile string, values interface{}) ([]byte, error) {
 	logrus.Debugf("started processing of template %s", templateFile)
 	name := path.Base(templateFile)
 	t := template.New(name).Funcs(map[string]interface{}{
@@ -76,7 +75,7 @@ func RenderTemplate(client *http.Client, templateFile string, values interface{}
 			}
 
 			logrus.Infof("getting sha256 for %s", buf.String())
-			sha256, err := getSha256ForAsset(client, buf.String())
+			sha256, err := getSha256ForAsset(downloader, buf.String())
 			if err != nil {
 				panic(err)
 			}

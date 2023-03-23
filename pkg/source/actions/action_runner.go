@@ -30,7 +30,7 @@ func getHTTPClient() *http.Client {
 		return oauth2.NewClient(context.TODO(), ts)
 	}
 
-	return http.DefaultClient
+	return nil
 }
 
 // RunAction runs the github action
@@ -78,7 +78,14 @@ func RunAction() error {
 		TemplateFile:       templateFile,
 	}
 
-	pluginName, pluginManifest, err := source.ProcessTemplate(h, templateFile, releaseRequest)
+	var d source.Downloader
+	if h != nil {
+		d = source.NewGithubDownloader().WithClient(h)
+	} else {
+		d = source.NewHttpDownloader()
+	}
+
+	pluginName, pluginManifest, err := source.ProcessTemplate(d, templateFile, releaseRequest)
 	if err != nil {
 		return err
 	}
